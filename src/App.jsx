@@ -147,8 +147,12 @@ const App = () => {
       const itemName = (row['รายการ'] || row['Item'] || '').toString().toLowerCase();
       const quantity = parseFloat(row['จำนวน'] || row['Quantity'] || 0);
       
+      // Keywords that definitely mean a course
       const hasKeywords = itemName.includes('คอร์ส') || itemName.includes('course') || itemName.includes('package') || itemName.includes('pkg');
-      const hasHighQty = quantity > 1;
+      
+      // Special Logic: Botox or 1U items are exempt from "Quantity > 1" being a course
+      const isBotoxOrUnit = itemName.includes('botox') || itemName.includes('1u');
+      const hasHighQty = isBotoxOrUnit ? false : quantity > 1;
 
       if (!customerMap[hn]) {
         customerMap[hn] = {
@@ -186,7 +190,6 @@ const App = () => {
       let reason = "";
       let isCourseType = false;
 
-      // ปรับปรุงตรรกะใหม่: ไม่นับจำนวนครั้งที่ชำระเงิน (visitCount) เป็นเกณฑ์ลูกค้าคอร์ส
       if (customer.hasCourseItem) {
         isCourseType = true;
         reason = "พบชื่อรายการ 'คอร์ส/Package'";
@@ -246,7 +249,7 @@ const App = () => {
               <TrendingUp className="text-blue-600" />
               วิเคราะห์กลุ่มลูกค้าและรายการที่ซื้อ
             </h1>
-            <p className="text-slate-500 text-sm">ตรวจสอบรายการสินค้าเชิงลึก (ตัดสินคอร์สจากรายการสินค้าและจำนวนเท่านั้น)</p>
+            <p className="text-slate-500 text-sm">ตรวจสอบรายการสินค้าเชิงลึก (Botox/1U จะไม่นับเป็นคอร์สแม้จำนวนมาก)</p>
           </div>
           
           <div className="flex items-center gap-3">
@@ -388,9 +391,9 @@ const App = () => {
           <div className="bg-white p-4 rounded-2xl border border-slate-100 flex-1 flex items-start gap-3">
             <div className="p-2 bg-purple-50 rounded-lg text-purple-500"><Info size={16}/></div>
             <div>
-              <h4 className="text-xs font-bold text-slate-800 mb-1">เกณฑ์การนับเป็น "ลูกค้าคอร์ส"</h4>
+              <h4 className="text-xs font-bold text-slate-800 mb-1">ข้อยกเว้นพิเศษ (Botox/Unit)</h4>
               <p className="text-[10px] text-slate-500 leading-relaxed">
-                พิจารณาจากรายการสินค้าเท่านั้น: พบคีย์เวิร์ด <b className="text-purple-600">"คอร์ส/Package"</b> หรือ <b className="text-purple-600">จำนวน {'>'} 1</b> ในบิลใดบิลหนึ่ง (การชำระเงินหลายครั้งแต่เป็นสินค้าทั่วไป จะไม่นับเป็นคอร์ส)
+                รายการที่มีคำว่า <b className="text-blue-600">"Botox"</b> หรือ <b className="text-blue-600">"1U"</b> จะถูกยกเว้นจากเกณฑ์ "จำนวนมากกว่า 1" (เช่น ซื้อ 100 ยูนิต จะนับเป็นครั้งเดียว) ยกเว้นจะมีคำว่า "คอร์ส/Package" กำกับไว้ชัดเจน
               </p>
             </div>
           </div>
@@ -399,7 +402,7 @@ const App = () => {
             <div>
               <h4 className="text-xs font-bold text-slate-800 mb-1">การนับเป็น "ลูกค้าซื้อครั้งเดียว"</h4>
               <p className="text-[10px] text-slate-500 leading-relaxed">
-                คือลูกค้าที่ซื้อเฉพาะสินค้าทั่วไปแบบรายชิ้น (จำนวน = 1) เท่านั้น <b className="text-blue-600">แม้จะมีการกลับมาซื้อซ้ำหลายครั้ง</b> ก็ยังคงสถานะเป็นลูกค้าซื้อครั้งเดียว
+                คือลูกค้าที่ซื้อเฉพาะสินค้าทั่วไปแบบรายชิ้น (จำนวน = 1) เท่านั้น <b className="text-blue-600">แม้จะมีการกลับมาซื้อซ้ำหลายครั้ง</b> หรือซื้อ Botox จำนวนมาก ก็ยังคงสถานะเป็นลูกค้าซื้อครั้งเดียว
               </p>
             </div>
           </div>
